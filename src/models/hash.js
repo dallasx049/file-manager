@@ -3,6 +3,7 @@ import { createReadStream } from 'node:fs';
 import { resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Writable } from 'node:stream';
+import { ErrorMessages } from '../constants.js';
 
 export class HashService {
   #cwd;
@@ -13,7 +14,7 @@ export class HashService {
 
   async calc(path) {
     if (!path) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const ws = new Writable({
@@ -29,7 +30,7 @@ export class HashService {
     try {
       await pipeline(rs, hash, ws);
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 }

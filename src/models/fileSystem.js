@@ -8,6 +8,7 @@ import {
 import { join, resolve, sep, dirname, parse } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Writable } from 'node:stream';
+import { ErrorMessages } from '../constants.js';
 
 export class FileSystemService {
   #cwd;
@@ -18,7 +19,7 @@ export class FileSystemService {
 
   async cat(path) {
     if (!path) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const filePath = resolve(this.#cwd.path, path);
@@ -31,13 +32,13 @@ export class FileSystemService {
       });
       await pipeline(createReadStream(filePath, 'utf8'), writable);
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async add(filename) {
     if (!filename || filename.includes(sep)) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const filePath = join(this.#cwd.path, filename);
@@ -45,25 +46,25 @@ export class FileSystemService {
     try {
       await appendFile(filePath, '', { flag: 'ax' });
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async mkdir(dirname) {
     if (!dirname || dirname.includes(sep)) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     try {
       await fs_mkdir(join(this.#cwd.path, dirname));
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async rn(path, newFilename) {
     if (!path || !newFilename || newFilename.includes(sep)) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const fileDir = dirname(resolve(this.#cwd.path, path));
@@ -71,13 +72,13 @@ export class FileSystemService {
     try {
       await rename(resolve(this.#cwd.path, path), resolve(fileDir, newFilename));
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async cp(filepath, newDirPath) {
     if (!filepath || !newDirPath) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const _filepath = resolve(this.#cwd.path, filepath);
@@ -86,7 +87,7 @@ export class FileSystemService {
     const copyPath = join(_newDirPath, base);
 
     if (_filepath === copyPath) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const src = createReadStream(_filepath, 'utf8');
@@ -95,13 +96,13 @@ export class FileSystemService {
     try {
       await pipeline(src, dest);
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async mv(filepath, newDirPath) {
     if (!filepath || !newDirPath) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const _filepath = resolve(this.#cwd.path, filepath);
@@ -110,7 +111,7 @@ export class FileSystemService {
     const copyPath = join(_newDirPath, base);
 
     if (_filepath === copyPath) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const src = createReadStream(_filepath, 'utf8');
@@ -120,13 +121,13 @@ export class FileSystemService {
       await pipeline(src, dest);
       await this.rm(_filepath);
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async rm(path) {
     if (!path) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     try {
@@ -135,7 +136,7 @@ export class FileSystemService {
         recursive: true,
       });
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 }

@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { createBrotliCompress, createBrotliDecompress } from 'node:zlib';
+import { ErrorMessages } from '../constants.js';
 
 export class ArchiveService {
   #cwd;
@@ -12,7 +13,7 @@ export class ArchiveService {
 
   async compress(src, dest) {
     if (!src || !dest) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     try {
@@ -22,13 +23,13 @@ export class ArchiveService {
         createWriteStream(resolve(this.#cwd.path, dest)),
       );
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
   async decompress(src, dest) {
     if (!src || !dest) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     try {
@@ -38,7 +39,7 @@ export class ArchiveService {
         createWriteStream(resolve(this.#cwd.path, dest)),
       );
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 }

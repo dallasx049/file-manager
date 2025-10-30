@@ -24,7 +24,13 @@ const AllowedOSArgs = {
   ARCH: '--architecture',
 };
 
+const ErrorMessages = {
+  INVALID_INPUT: 'Invalid input',
+  OPERATION_FAILED: 'Operation failed',
+};
+
 export {
   AllowedCommands,
   AllowedOSArgs,
+  ErrorMessages,
 };

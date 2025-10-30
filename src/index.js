@@ -1,6 +1,6 @@
 import { homedir } from 'node:os';
 
-import { AllowedCommands } from './constants.js';
+import { AllowedCommands, ErrorMessages } from './constants.js';
 import { exitFileManager, getUsernameFromArgv } from './helpers.js';
 import {
   CwdService,
@@ -13,63 +13,59 @@ import {
 
 const init = () => {
   const username = getUsernameFromArgv(process.argv);
-  const cwd = new CwdService(homedir());
 
   // Init the services once the app is initialized
-  const navigationService = new NavigationService(cwd);
-  const fileSystemService = new FileSystemService(cwd);
+  const cwdService = new CwdService(homedir());
+  const navigationService = new NavigationService(cwdService);
+  const fileSystemService = new FileSystemService(cwdService);
   const operatingSystemService = new OperatingSystemService();
-  const hashService = new HashService(cwd);
-  const archiveService = new ArchiveService(cwd);
-
-  const { cd, ls, up } = navigationService;
-  const { add, rm, cat, rn, mv, mkdir, cp } = fileSystemService;
-  const { info } = operatingSystemService;
-  const { calc } = hashService;
-  const { compress, decompress } = archiveService;
+  const hashService = new HashService(cwdService);
+  const archiveService = new ArchiveService(cwdService);
 
   // Bind the context to the respective services to not lose this
-  const handlers = {
+  const commandProcessors = {
     [AllowedCommands.EXIT]: () => exitFileManager(username),
 
-    [AllowedCommands.CAT]: cat.bind(fileSystemService),
-    [AllowedCommands.ADD]: add.bind(fileSystemService),
-    [AllowedCommands.MKDIR]: mkdir.bind(fileSystemService),
-    [AllowedCommands.RN]: rn.bind(fileSystemService),
-    [AllowedCommands.CP]: cp.bind(fileSystemService),
-    [AllowedCommands.MV]: mv.bind(fileSystemService),
-    [AllowedCommands.RM]: rm.bind(fileSystemService),
+    [AllowedCommands.CAT]: fileSystemService.cat.bind(fileSystemService),
+    [AllowedCommands.ADD]: fileSystemService.add.bind(fileSystemService),
+    [AllowedCommands.MKDIR]: fileSystemService.mkdir.bind(fileSystemService),
+    [AllowedCommands.RN]: fileSystemService.rn.bind(fileSystemService),
+    [AllowedCommands.CP]: fileSystemService.cp.bind(fileSystemService),
+    [AllowedCommands.MV]: fileSystemService.mv.bind(fileSystemService),
+    [AllowedCommands.RM]: fileSystemService.rm.bind(fileSystemService),
 
-    [AllowedCommands.UP]: up.bind(navigationService),
-    [AllowedCommands.CD]: cd.bind(navigationService),
-    [AllowedCommands.LS]: ls.bind(navigationService),
+    [AllowedCommands.UP]: navigationService.up.bind(navigationService),
+    [AllowedCommands.CD]: navigationService.cd.bind(navigationService),
+    [AllowedCommands.LS]: navigationService.ls.bind(navigationService),
 
-    [AllowedCommands.OS]: info.bind(operatingSystemService),
+    [AllowedCommands.OS]: operatingSystemService.info.bind(operatingSystemService),
 
-    [AllowedCommands.HASH]: calc.bind(hashService),
+    [AllowedCommands.HASH]: hashService.calc.bind(hashService),
 
-    [AllowedCommands.COMPRESS]: compress.bind(archiveService),
-    [AllowedCommands.DECOMPRESS]: decompress.bind(archiveService),
+    [AllowedCommands.COMPRESS]: archiveService.compress.bind(archiveService),
+    [AllowedCommands.DECOMPRESS]: archiveService.decompress.bind(archiveService),
   };
 
   console.log(`Welcome to the File Manager, ${username}!`);
-  cwd.print();
+  cwdService.print();
 
   process.on('SIGINT', () => exitFileManager(username));
 
   process.stdin.on('data', async (data) => {
     const [command, ...args] = data.toString().trim().split(' ');
-    const handler = handlers[command];
+    const processor = commandProcessors[command];
+
+    if (!processor) {
+      console.log(ErrorMessages.INVALID_INPUT);
+      return;
+    }
 
     try {
-      if (!handler) {
-        throw new Error('Invalid input');
-      }
-      await handler(...args);
+      await processor(...args);
     } catch (e) {
       console.log(e.message);
     } finally {
-      cwd.print();
+      cwdService.print();
     }
   });
 };

@@ -1,5 +1,6 @@
 import { resolve, join } from 'node:path';
 import { readdir, access, constants } from 'node:fs/promises';
+import { ErrorMessages } from '../constants.js';
 
 export class NavigationService {
   #cwd;
@@ -7,14 +8,14 @@ export class NavigationService {
   constructor(cwd) {
     this.#cwd = cwd;
   }
-  
+
   up() {
     this.#cwd.path = join(this.#cwd.path, '..');
   }
 
   async cd(path) {
     if (!path) {
-      throw new Error('Invalid input');
+      throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
     const newPath = resolve(this.#cwd.path, path);
@@ -23,7 +24,7 @@ export class NavigationService {
       await access(newPath, constants.R_OK);
       this.#cwd.path = newPath;
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 
@@ -37,7 +38,7 @@ export class NavigationService {
         })).sort((a, b) => a.Name.localeCompare(b.Name) && a.Type.localeCompare(b.Type));
       console.table(table);
     } catch {
-      throw new Error('Operation failed');
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
   }
 }

@@ -1,14 +1,10 @@
 import os from 'node:os';
-import { AllowedOSArgs } from '../constants.js';
+import { AllowedOSArgs, ErrorMessages } from '../constants.js';
 
 export class OperatingSystemService {
   constructor() {}
 
   info(arg) {
-    if (!Object.values(AllowedOSArgs).includes(arg)) {
-      throw new Error('Invalid input');
-    }
-
     switch (arg) {
       case AllowedOSArgs.EOL: {
         console.log(os.EOL === '\n' ? '\\n' : '\\r\\n');
@@ -35,6 +31,9 @@ export class OperatingSystemService {
       case AllowedOSArgs.ARCH: {
         console.log(os.arch());
         break;
+      }
+      default: {
+        throw new Error(ErrorMessages.INVALID_INPUT);
       }
     }
   }
