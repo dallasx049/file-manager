@@ -7,6 +7,7 @@ import {
   NavigationService,
   FileSystemService,
   OperatingSystemService,
+  HashService,
 } from './models/index.js';
 
 const init = () => {
@@ -16,6 +17,7 @@ const init = () => {
   const navigation = new NavigationService(cwd);
   const fileSystem = new FileSystemService(cwd);
   const operatingSystem = new OperatingSystemService();
+  const hash = new HashService(cwd);
 
   const { cd, ls, up } = navigation;
   const { add, rm, cat, rn, mv, mkdir, cp } = fileSystem;
@@ -36,6 +38,8 @@ const init = () => {
     [AllowedCommands.EXIT]: () => exitFileManager(username),
 
     [AllowedCommands.OS]: operatingSystem.info.bind(operatingSystem),
+
+    [AllowedCommands.HASH]: hash.calc.bind(hash),
   };
 
   console.log(`Welcome to the File Manager, ${username}!`);
