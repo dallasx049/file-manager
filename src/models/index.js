@@ -3,3 +3,4 @@ export { CwdService } from './cwd.js';
 export { FileSystemService } from './fileSystem.js';
 export { OperatingSystemService } from './os.js';
 export { HashService } from './hash.js';
+export { ArchiveService } from './archive.js';
