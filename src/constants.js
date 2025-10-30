@@ -16,6 +16,15 @@ const AllowedCommands = {
   DECOMPRESS: 'decompress',
 };
 
+const AllowedOSArgs = {
+  EOL: '--EOL',
+  CPUS: '--cpus',
+  HOMEDIR: '--homedir',
+  USERNAME: '--username',
+  ARCH: '--architecture',
+};
+
 export {
   AllowedCommands,
+  AllowedOSArgs,
 };
