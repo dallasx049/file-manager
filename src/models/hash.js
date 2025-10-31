@@ -3,6 +3,7 @@ import { createReadStream } from 'node:fs';
 import { resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Writable } from 'node:stream';
+
 import { ErrorMessages } from '../constants.js';
 
 export class HashService {
@@ -17,9 +18,9 @@ export class HashService {
       throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
-    const ws = new Writable({
+    const stdoutInstance = new Writable({
       write(data, encoding, callback) {
-        process.stdout.write(data.toString());
+        process.stdout.write(data);
         process.stdout.write('\n');
         callback();
       },
@@ -28,7 +29,7 @@ export class HashService {
     const hash = createHash('sha256').setEncoding('hex');
 
     try {
-      await pipeline(rs, hash, ws);
+      await pipeline(rs, hash, stdoutInstance);
     } catch {
       throw new Error(ErrorMessages.OPERATION_FAILED);
     }

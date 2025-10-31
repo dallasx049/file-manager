@@ -1,7 +1,5 @@
-import { homedir } from 'node:os';
-
 import { AllowedCommands, ErrorMessages } from './constants.js';
-import { exitFileManager, getUsernameFromArgv } from './helpers.js';
+import { exitFileManager, getUsername } from './helpers.js';
 import {
   CwdService,
   NavigationService,
@@ -12,10 +10,10 @@ import {
 } from './models/index.js';
 
 const init = () => {
-  const username = getUsernameFromArgv(process.argv);
+  const username = getUsername();
 
   // Init the services once the app is initialized
-  const cwdService = new CwdService(homedir());
+  const cwdService = new CwdService();
   const navigationService = new NavigationService(cwdService);
   const fileSystemService = new FileSystemService(cwdService);
   const operatingSystemService = new OperatingSystemService();
@@ -47,7 +45,7 @@ const init = () => {
   };
 
   console.log(`Welcome to the File Manager, ${username}!`);
-  cwdService.print();
+  cwdService.printPath();
 
   process.on('SIGINT', () => exitFileManager(username));
 
@@ -65,7 +63,7 @@ const init = () => {
     } catch (e) {
       console.log(e.message);
     } finally {
-      cwdService.print();
+      cwdService.printPath();
     }
   });
 };

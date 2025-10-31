@@ -1,9 +1,9 @@
-export class CwdService {
-  #path;
+import { homedir } from 'node:os';
 
-  constructor(path) {
-    this.#path = path;
-  }
+export class CwdService {
+  #path = homedir();
+
+  constructor() {}
 
   get path() {
     return this.#path;
@@ -13,7 +13,7 @@ export class CwdService {
     this.#path = value;
   }
 
-  print() {
+  printPath() {
     console.log(`You are currently in ${this.#path}`);
   }
 }

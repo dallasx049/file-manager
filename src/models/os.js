@@ -1,4 +1,5 @@
-import os from 'node:os';
+import { cpus, homedir, userInfo, arch, EOL } from 'node:os';
+
 import { AllowedOSArgs, ErrorMessages } from '../constants.js';
 
 export class OperatingSystemService {
@@ -7,29 +8,28 @@ export class OperatingSystemService {
   info(arg) {
     switch (arg) {
       case AllowedOSArgs.EOL: {
-        console.log(os.EOL === '\n' ? '\\n' : '\\r\\n');
+        console.log(EOL === '\n' ? '\\n' : '\\r\\n');
         break;
       }
       case AllowedOSArgs.CPUS: {
-        const cpus = os.cpus();
-        const info = cpus.map((core) => ({
+        const mappedCpus = cpus().map((core) => ({
           model: core.model,
           clockRate: core.speed / 1000,
         }));
-        console.log(`Amount: ${cpus.length}`);
-        console.log(info);
+        console.log(`Amount: ${mappedCpus.length}`);
+        console.log(mappedCpus);
         break;
       }
       case AllowedOSArgs.HOMEDIR: {
-        console.log(os.homedir());
+        console.log(homedir());
         break;
       }
       case AllowedOSArgs.USERNAME: {
-        console.log(os.userInfo().username);
+        console.log(userInfo().username);
         break;
       }
       case AllowedOSArgs.ARCH: {
-        console.log(os.arch());
+        console.log(arch());
         break;
       }
       default: {

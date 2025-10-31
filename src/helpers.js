@@ -3,12 +3,12 @@ const exitFileManager = (username) => {
   process.exit();
 };
 
-const getUsernameFromArgv = (argv) => {
-  const args = argv.slice(2);
+const getUsername = () => {
+  const args = process.argv.slice(2);
   return args[0]?.split('=')[1] || 'Anonymous';
 };
 
 export {
   exitFileManager,
-  getUsernameFromArgv,
+  getUsername,
 };
