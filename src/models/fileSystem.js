@@ -4,11 +4,13 @@ import {
   mkdir as fs_mkdir,
   rm as fs_rm,
   rename,
+  stat,
 } from 'node:fs/promises';
 import { join, resolve, sep, dirname, parse } from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import { Writable } from 'node:stream';
+
 import { ErrorMessages } from '../constants.js';
+import { StdoutInstance } from '../helpers.js';
 
 export class FileSystemService {
   #cwd;
@@ -25,12 +27,8 @@ export class FileSystemService {
     const filePath = resolve(this.#cwd.path, path);
 
     try {
-      const writable = new Writable({
-        write(chunk, encoding, cb) {
-          process.stdout.write(chunk, encoding, cb);
-        },
-      });
-      await pipeline(createReadStream(filePath, 'utf8'), writable);
+      const stdout = new StdoutInstance();
+      await pipeline(createReadStream(filePath, 'utf8'), stdout);
     } catch {
       throw new Error(ErrorMessages.OPERATION_FAILED);
     }
@@ -41,10 +39,8 @@ export class FileSystemService {
       throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
-    const filePath = join(this.#cwd.path, filename);
-
     try {
-      await appendFile(filePath, '', { flag: 'ax' });
+      await appendFile(join(this.#cwd.path, filename), '', { flag: 'ax' });
     } catch {
       throw new Error(ErrorMessages.OPERATION_FAILED);
     }
@@ -67,10 +63,17 @@ export class FileSystemService {
       throw new Error(ErrorMessages.INVALID_INPUT);
     }
 
-    const fileDir = dirname(resolve(this.#cwd.path, path));
+    const resolvedSrcPath = resolve(this.#cwd.path, path);
+    const srcDir = dirname(resolvedSrcPath);
 
     try {
-      await rename(resolve(this.#cwd.path, path), resolve(fileDir, newFilename));
+      const stats = await stat(path);
+
+      if (!stats.isFile()) {
+        throw new Error();
+      }
+
+      await rename(resolvedSrcPath, join(srcDir, newFilename));
     } catch {
       throw new Error(ErrorMessages.OPERATION_FAILED);
     }
@@ -87,14 +90,20 @@ export class FileSystemService {
     const copyPath = join(_newDirPath, base);
 
     if (_filepath === copyPath) {
-      throw new Error(ErrorMessages.INVALID_INPUT);
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
 
-    const src = createReadStream(_filepath, 'utf8');
-    const dest = createWriteStream(copyPath);
-
     try {
-      await pipeline(src, dest);
+      const stats = await stat(_filepath);
+
+      if (!stats.isFile()) {
+        throw new Error();
+      }
+
+      const rs = createReadStream(_filepath);
+      const ws = createWriteStream(copyPath);
+
+      await pipeline(rs, ws);
     } catch {
       throw new Error(ErrorMessages.OPERATION_FAILED);
     }
@@ -111,13 +120,19 @@ export class FileSystemService {
     const copyPath = join(_newDirPath, base);
 
     if (_filepath === copyPath) {
-      throw new Error(ErrorMessages.INVALID_INPUT);
+      throw new Error(ErrorMessages.OPERATION_FAILED);
     }
 
-    const src = createReadStream(_filepath, 'utf8');
-    const dest = createWriteStream(copyPath);
-
     try {
+      const stats = await stat(_filepath);
+
+      if (!stats.isFile()) {
+        throw new Error();
+      }
+
+      const src = createReadStream(_filepath);
+      const dest = createWriteStream(copyPath);
+
       await pipeline(src, dest);
       await this.rm(_filepath);
     } catch {
@@ -131,10 +146,7 @@ export class FileSystemService {
     }
 
     try {
-      await fs_rm(resolve(this.#cwd.path, path), {
-        force: true,
-        recursive: true,
-      });
+      await fs_rm(resolve(this.#cwd.path, path), { recursive: true });
     } catch {
       throw new Error(ErrorMessages.OPERATION_FAILED);
     }
